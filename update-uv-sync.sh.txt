@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Find the Python that belongs to the currently used uv installation
+UV_BIN="$(command -v uv)"
+
+if [[ -z "$UV_BIN" ]]; then
+  echo "uv not found in PATH"
+  exit 1
+fi
+
+PYTHON_BIN="$(dirname "$UV_BIN")/python"
+
+if [[ ! -x "$PYTHON_BIN" ]]; then
+  echo "Python not found next to uv: $PYTHON_BIN"
+  echo "Fallback: using python from PATH"
+  PYTHON_BIN="$(command -v python3 || command -v python)"
+fi
+
+"$PYTHON_BIN" -m pip install --upgrade uv
+
+# Refresh shell command cache
+hash -r 2>/dev/null || true
+
+uv sync
